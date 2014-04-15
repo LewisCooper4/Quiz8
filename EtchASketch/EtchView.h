@@ -13,14 +13,12 @@
     
 }
 
-@property NSMutableArray *points;
+@property (nonatomic) UIBezierPath *points;
 
 @property CGPoint currentPoint;
 
 @property CGFloat currentHorizontalAngle;
 @property CGFloat currentVerticalAngle;
 @property CGFloat currentVelocity;
-
-- (void) saveCurrentPoint;
 
 @end

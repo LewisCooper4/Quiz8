@@ -33,6 +33,20 @@
     // Release any retained subviews of the main view.
 }
 
+- (BOOL)canBecomeFirstResponder {
+    return YES;
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    [self becomeFirstResponder];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [self resignFirstResponder];
+    [super viewWillDisappear:animated];
+}
+
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
     return (interfaceOrientation != UIInterfaceOrientationPortraitUpsideDown);
@@ -42,36 +56,71 @@
 {
     UIRotationGestureRecognizer *s = sender;
     NSLog(@"%f radians horizontal", s.rotation);
-    if (lastVelocity > 0 && s.velocity < 0) {
-        [self.etchView saveCurrentPoint];
+    
+    CGPoint currPoint = [etchView currentPoint];
+    
+    if (s.velocity < 0) {
+        currPoint.x = currPoint.x - fabs(s.rotation);
     }
-    if (lastVelocity < 0 && s.velocity > 0) {
-        [self.etchView saveCurrentPoint];
+    else if (s.velocity > 0) {
+        currPoint.x = currPoint.x + fabs(s.rotation);
     }
-    [self.etchView setCurrentHorizontalAngle:s.rotation];
-    [self.etchView setCurrentVelocity:s.velocity];
-    if (s.state == UIGestureRecognizerStateEnded) {
-        [self.etchView saveCurrentPoint];
+    
+    if (currPoint.x < 0) {
+        currPoint.x = 0;
     }
-    lastVelocity = s.velocity;
+    else if (currPoint.x > etchView.bounds.size.width - 1) {
+        currPoint.x = etchView.bounds.size.width - 1;
+    }
+    
+    etchView.currentPoint = CGPointMake(currPoint.x, currPoint.y);
+    
+    [etchView setNeedsDisplay];
+    
+    s.rotation = 0;
+    
 }
 
 - (IBAction)addVertical:(id)sender {
     
     UIRotationGestureRecognizer *s = sender;
     NSLog(@"%f radians vertical", s.rotation);
-    if (lastVelocity > 0 && s.velocity < 0) {
-        [self.etchView saveCurrentPoint];
+    
+    CGPoint currPoint = [etchView currentPoint];
+    
+    if (s.velocity < 0) {
+        currPoint.y = currPoint.y - fabs(s.rotation);
     }
-    if (lastVelocity < 0 && s.velocity > 0) {
-        [self.etchView saveCurrentPoint];
+    else if (s.velocity > 0) {
+        currPoint.y = currPoint.y + fabs(s.rotation);
     }
-    [self.etchView setCurrentVerticalAngle:s.rotation];
-    [self.etchView setCurrentVelocity:s.velocity];
-    if (s.state == UIGestureRecognizerStateEnded) {
-        [self.etchView saveCurrentPoint];
+    
+    if (currPoint.y < 0) {
+        currPoint.y = 0;
     }
-    lastVelocity = s.velocity;
+    else if (currPoint.y > etchView.bounds.size.height - 1) {
+        currPoint.y = etchView.bounds.size.height - 1;
+    }
+        
+    etchView.currentPoint = CGPointMake(currPoint.x, currPoint.y);
+    
+    [etchView setNeedsDisplay];
+    
+    s.rotation = 0;
+}
+
+- (void) motionEnded:(UIEventSubtype)motion withEvent:(UIEvent *)event
+{
+    if (event.subtype == UIEventSubtypeMotionShake) {
+        
+        [etchView.points removeAllPoints];
+        [etchView.points addLineToPoint:etchView.currentPoint];
+        [etchView setNeedsDisplay];
+    }
+    
+    if ([super respondsToSelector:@selector(motionEnded:withEvent:)]) {
+        [super motionEnded:motion withEvent:event];
+    }
 }
 
 @end

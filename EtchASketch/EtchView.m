@@ -17,7 +17,24 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
-        // Initialization code
+        
+        
+        points = [[UIBezierPath alloc]init];
+        [points moveToPoint:CGPointMake(self.bounds.size.width/2, self.bounds.size.height/2)];
+        currentPoint = CGPointMake(self.bounds.size.width/2, self.bounds.size.height/2);
+        
+    }
+    return self;
+}
+
+-(id)initWithCoder:(NSCoder *)aDecoder{
+    self = [super initWithCoder:aDecoder];
+    if(self){
+        points = [[UIBezierPath alloc]init];
+        [points moveToPoint:CGPointMake(self.bounds.size.width/2, self.bounds.size.height/2)];
+        currentPoint = CGPointMake(self.bounds.size.width/2, self.bounds.size.height/2);
+        //set background
+        [self setBackgroundColor:[UIColor lightGrayColor]];
     }
     return self;
 }
@@ -25,44 +42,13 @@
 
 - (void)drawRect:(CGRect)rect
 {
-    UIBezierPath *bz = [[UIBezierPath alloc] init];
-    [bz setLineWidth:3.0];
-    [[UIColor blackColor] setStroke];
+    UIRectFill(CGRectMake(currentPoint.x, currentPoint.y, 2, 2));
     
-    [bz moveToPoint:[[points objectAtIndex:0] CGPointValue]];
-    for (id p in points) {
-        [bz addLineToPoint:[p CGPointValue]];
-    }
-    
-    CGPoint lastPoint = [[points lastObject] CGPointValue];
-    currentPoint = CGPointMake(lastPoint.x + self.currentHorizontalAngle*10.0, lastPoint.y + self.currentVerticalAngle*10.0);
-    
-    // make sure the dot stays in the screen
-    if (currentPoint.x < 0) {
-        currentPoint.x = 0;
-    }
-    else if (currentPoint.x > self.bounds.size.width) {
-        currentPoint.x = self.bounds.size.width;
-    }
-    if (currentPoint.y < 0) {
-        currentPoint.y = 0;
-    }
-    if (currentPoint.y > self.bounds.size.height) {
-        currentPoint.y = self.bounds.size.height;
-    }
-    
-    [bz addLineToPoint:currentPoint];
-    [self saveCurrentPoint];
-    [bz stroke];
-    
-    [self drawCurrentPoint];
+    [points addLineToPoint:currentPoint];
+    [points stroke];
 }
 
-- (void) saveCurrentPoint
-{
-    [points addObject:[NSValue valueWithCGPoint:currentPoint]];
-}
-
+/*
 - (void) drawCurrentPoint
 {
     [[UIColor whiteColor] setStroke];
@@ -79,21 +65,10 @@
     [path addLineToPoint:p];
     [path stroke];
 }
+ */
                             
 
-- (void) motionEnded:(UIEventSubtype)motion withEvent:(UIEvent *)event
-{
-    if (event.subtype == UIEventSubtypeMotionShake) {
-        
-        [points removeAllObjects];
-        [points addObject:[NSValue valueWithCGPoint:currentPoint]];
-        [self setNeedsDisplay];
-    }
-    
-    if ([super respondsToSelector:@selector(motionEnded:withEvent:)]) {
-        [super motionEnded:motion withEvent:event];
-    }
-}
+
 
 
 @end
